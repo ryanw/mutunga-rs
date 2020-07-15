@@ -1,5 +1,5 @@
 use crate::Event;
-use libc::{c_int, sighandler_t, signal, syscall, winsize, SYS_ioctl, SIGWINCH, STDIN_FILENO, TIOCGWINSZ};
+use libc::{c_int, ioctl, sighandler_t, signal, winsize, SIGWINCH, STDIN_FILENO, TIOCGWINSZ};
 use std::sync::atomic::{AtomicU32, Ordering};
 use std::sync::{mpsc, Mutex};
 use std::thread;
@@ -18,7 +18,7 @@ extern "C" fn handle_resize(_sig: c_int) {
 		ws_ypixel: 0,
 	};
 	unsafe {
-		syscall(SYS_ioctl, STDIN_FILENO, TIOCGWINSZ, &mut size);
+		ioctl(STDIN_FILENO, TIOCGWINSZ, &mut size);
 	}
 	let width = size.ws_col as u32;
 	let height = size.ws_row as u32;

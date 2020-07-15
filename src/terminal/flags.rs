@@ -1,13 +1,18 @@
 use super::Terminal;
-use libc::{syscall, tcflag_t, termios, SYS_ioctl, STDIN_FILENO, TCGETS, TCSETS};
+use libc::{ioctl, syscall, tcflag_t, tcgetattr, tcsetattr, termios, STDIN_FILENO, TCSANOW};
 
 impl Terminal {
 	pub fn term_ios(&self) -> termios {
 		let mut ios = termios {
+			// Input flags
 			c_iflag: Default::default(),
+			// Output flags
 			c_oflag: Default::default(),
+			// Control flags
 			c_cflag: Default::default(),
+			// Local flags
 			c_lflag: Default::default(),
+			#[cfg(target_os = "linux")]
 			c_line: Default::default(),
 			c_cc: Default::default(),
 			c_ispeed: Default::default(),
@@ -15,7 +20,7 @@ impl Terminal {
 		};
 
 		unsafe {
-			syscall(SYS_ioctl, STDIN_FILENO, TCGETS, &mut ios);
+			tcgetattr(STDIN_FILENO, &mut ios);
 		}
 
 		ios
@@ -23,7 +28,7 @@ impl Terminal {
 
 	pub fn set_term_ios(&mut self, ios: termios) {
 		unsafe {
-			syscall(SYS_ioctl, STDIN_FILENO, TCSETS, &ios);
+			tcsetattr(STDIN_FILENO, TCSANOW, &ios);
 		}
 	}
 
