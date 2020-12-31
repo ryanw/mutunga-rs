@@ -147,7 +147,7 @@ impl TerminalCanvas {
 							if cursor_bg != bg {
 								cursor_bg = bg;
 								if bg == Color::transparent() {
-									term.reset();
+									term.reset()?;
 									cursor_fg = Color::transparent();
 								} else {
 									term.bg_color(front_cell.bg)?;

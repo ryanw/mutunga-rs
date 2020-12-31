@@ -1,4 +1,4 @@
-use crate::{geom::Rect, Cell};
+use crate::{geom::Rect, Cell, Color};
 
 #[derive(Default, Clone, Debug)]
 pub struct Canvas {
@@ -122,6 +122,16 @@ impl Canvas {
 			Some(&mut self.cells[idx])
 		} else {
 			None
+		}
+	}
+
+	pub fn draw_text(&mut self, mut x: i32, y: i32, fg: Color, bg: Color, text: &str) {
+		for symbol in text.chars() {
+			if let Some(dst) = self.cell_mut(x, y) {
+				let cell = Cell { fg, bg, symbol };
+				*dst = cell.blend(dst);
+			}
+			x += 1;
 		}
 	}
 
