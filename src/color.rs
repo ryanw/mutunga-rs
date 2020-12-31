@@ -75,6 +75,24 @@ impl Color {
 		}
 	}
 
+	pub fn magenta() -> Self {
+		Self {
+			r: 255,
+			g: 0,
+			b: 255,
+			a: 255,
+		}
+	}
+
+	pub fn cyan() -> Self {
+		Self {
+			r: 0,
+			g: 255,
+			b: 255,
+			a: 255,
+		}
+	}
+
 	pub fn as_8bit_ansi(&self) -> Ansi8BitColor {
 		let r = self.r / 51;
 		let g = self.g / 51;
