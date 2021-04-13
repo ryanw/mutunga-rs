@@ -133,4 +133,10 @@ impl Color {
 			(a * 255.0) as u8,
 		)
 	}
+
+	pub fn set_brightness(&mut self, brightness: f32) {
+		self.r = (self.r as f32 * brightness) as u8;
+		self.g = (self.g as f32 * brightness) as u8;
+		self.b = (self.b as f32 * brightness) as u8;
+	}
 }
