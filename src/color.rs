@@ -8,6 +8,30 @@ pub struct Color {
 	pub a: u8,
 }
 
+impl From<(u8, u8, u8)> for Color {
+	fn from(color: (u8, u8, u8)) -> Color {
+		Color::rgb(color.0, color.1, color.2)
+	}
+}
+
+impl From<[u8; 3]> for Color {
+	fn from(color: [u8; 3]) -> Color {
+		Color::rgb(color[0], color[1], color[2])
+	}
+}
+
+impl From<(u8, u8, u8, u8)> for Color {
+	fn from(color: (u8, u8, u8, u8)) -> Color {
+		Color::rgba(color.0, color.1, color.2, color.3)
+	}
+}
+
+impl From<[u8; 4]> for Color {
+	fn from(color: [u8; 4]) -> Color {
+		Color::rgba(color[0], color[1], color[2], color[3])
+	}
+}
+
 impl Color {
 	pub fn rgb(r: u8, g: u8, b: u8) -> Self {
 		Self::rgba(r, g, b, 255)
