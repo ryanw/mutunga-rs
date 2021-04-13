@@ -1,5 +1,5 @@
 use super::Terminal;
-use libc::{ioctl, syscall, tcflag_t, tcgetattr, tcsetattr, termios, STDIN_FILENO, TCSANOW};
+use libc::{tcflag_t, tcgetattr, tcsetattr, termios, STDIN_FILENO, TCSANOW};
 
 impl Terminal {
 	pub fn term_ios(&self) -> termios {

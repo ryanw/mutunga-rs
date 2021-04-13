@@ -22,7 +22,7 @@ impl Cell {
 
 	pub fn blend(&self, cell: &Cell) -> Cell {
 		let bg = self.bg.blend(&cell.bg);
-		let mut fg = self.fg.clone();
+		let fg;
 		let symbol = if (self.symbol == ' ' || self.symbol == '\0') && cell.symbol != '\0' {
 			fg = self.bg.blend(&cell.fg);
 			cell.symbol

@@ -10,12 +10,12 @@ const ESC: char = '\x1b';
 extern "C" fn handle_interrupt(_sig: c_int) {
 	// Hacks to cleanup the terminal
 	let mut term = Terminal::new();
-	term.main_screen();
-	term.show_cursor();
-	term.normal_mode();
-	term.disable_mouse_move();
-	term.disable_mouse();
-	term.flush();
+	let _ = term.main_screen();
+	let _ = term.show_cursor();
+	let _ = term.normal_mode();
+	let _ = term.disable_mouse_move();
+	let _ = term.disable_mouse();
+	let _ = term.flush();
 	std::process::exit(0);
 }
 

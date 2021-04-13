@@ -11,7 +11,6 @@ pub use canvas::*;
 pub mod geom;
 
 use std::io;
-use std::io::Write;
 use std::sync::mpsc::{Receiver, TryRecvError};
 
 pub struct TerminalCanvas {
