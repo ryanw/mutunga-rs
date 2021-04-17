@@ -14,6 +14,7 @@ pub enum MouseButton {
 #[derive(Debug, Clone, PartialEq)]
 pub enum Event {
 	Resize(u32, u32),
+	PixelResize(u32, u32),
 	MouseMove(MouseButton, u32, u32),
 	MouseUp(MouseButton, u32, u32),
 	MouseDown(MouseButton, u32, u32),
