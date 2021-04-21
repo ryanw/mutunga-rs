@@ -8,8 +8,10 @@ use super::Terminal;
 
 static TERM_WIDTH: AtomicU32 = AtomicU32::new(0);
 static TERM_HEIGHT: AtomicU32 = AtomicU32::new(0);
-static WIN_WIDTH: AtomicU32 = AtomicU32::new(0);
-static WIN_HEIGHT: AtomicU32 = AtomicU32::new(0);
+static PIXEL_WIDTH: AtomicU32 = AtomicU32::new(0);
+static PIXEL_HEIGHT: AtomicU32 = AtomicU32::new(0);
+static FONT_WIDTH: AtomicU32 = AtomicU32::new(16);
+static FONT_HEIGHT: AtomicU32 = AtomicU32::new(32);
 static mut RESIZE_CHANNEL: Option<Mutex<mpsc::Sender<Event>>> = None;
 
 extern "C" fn handle_resize(_sig: c_int) {
@@ -23,9 +25,6 @@ extern "C" fn handle_resize(_sig: c_int) {
 		ioctl(STDIN_FILENO, TIOCGWINSZ, &mut size);
 	}
 
-	let font_width = size.ws_xpixel / size.ws_col;
-	let font_height = size.ws_ypixel / size.ws_row;
-
 	let term_width = size.ws_col as u32;
 	let term_height = size.ws_row as u32;
 
@@ -35,22 +34,42 @@ extern "C" fn handle_resize(_sig: c_int) {
 		unsafe {
 			if let Some(chan) = RESIZE_CHANNEL.as_ref() {
 				if let Ok(chan) = chan.lock() {
-					chan.send(Event::Resize(term_width, term_height));
+					let _ = chan.send(Event::Resize(term_width, term_height));
 				}
 			}
 		}
 	}
 
-	let win_width = size.ws_xpixel as u32;
-	let win_height = size.ws_ypixel as u32;
+	let pixel_width = size.ws_xpixel as u32;
+	let pixel_height = size.ws_ypixel as u32;
 
-	if WIN_WIDTH.load(Ordering::SeqCst) != win_width || WIN_HEIGHT.load(Ordering::SeqCst) != win_height {
-		WIN_WIDTH.store(win_width, Ordering::SeqCst);
-		WIN_HEIGHT.store(win_height, Ordering::SeqCst);
+	if PIXEL_WIDTH.load(Ordering::SeqCst) != pixel_width || PIXEL_HEIGHT.load(Ordering::SeqCst) != pixel_height {
+		PIXEL_WIDTH.store(pixel_width, Ordering::SeqCst);
+		PIXEL_HEIGHT.store(pixel_height, Ordering::SeqCst);
 		unsafe {
 			if let Some(chan) = RESIZE_CHANNEL.as_ref() {
 				if let Ok(chan) = chan.lock() {
-					chan.send(Event::PixelResize(win_width, win_height));
+					let _ = chan.send(Event::PixelResize(pixel_width, pixel_height));
+				}
+			}
+		}
+	}
+
+	let mut font_width = (size.ws_xpixel / size.ws_col) as u32;
+	let mut font_height = (size.ws_ypixel / size.ws_row) as u32;
+
+	if font_width == 0 || font_height == 0 {
+		font_width = 16;
+		font_height = 32;
+	}
+
+	if FONT_WIDTH.load(Ordering::SeqCst) != font_width || FONT_HEIGHT.load(Ordering::SeqCst) != font_height {
+		FONT_WIDTH.store(font_width, Ordering::SeqCst);
+		FONT_HEIGHT.store(font_height, Ordering::SeqCst);
+		unsafe {
+			if let Some(chan) = RESIZE_CHANNEL.as_ref() {
+				if let Ok(chan) = chan.lock() {
+					let _ = chan.send(Event::FontResize(font_width, font_height));
 				}
 			}
 		}
@@ -93,10 +112,22 @@ impl Terminal {
 	}
 
 	pub fn pixel_width(&self) -> u32 {
-		WIN_WIDTH.load(Ordering::SeqCst)
+		PIXEL_WIDTH.load(Ordering::SeqCst)
 	}
 
 	pub fn pixel_height(&self) -> u32 {
-		WIN_HEIGHT.load(Ordering::SeqCst)
+		PIXEL_HEIGHT.load(Ordering::SeqCst)
+	}
+
+	pub fn font_width(&self) -> u32 {
+		FONT_WIDTH.load(Ordering::SeqCst)
+	}
+
+	pub fn font_height(&self) -> u32 {
+		FONT_HEIGHT.load(Ordering::SeqCst)
+	}
+
+	pub fn font_ratio(&self) -> f32 {
+		self.font_height() as f32 / self.font_width() as f32
 	}
 }
