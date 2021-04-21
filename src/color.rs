@@ -8,6 +8,51 @@ pub struct Color {
 	pub a: u8,
 }
 
+impl From<f32> for Color {
+	fn from(grey: f32) -> Color {
+		let g = (grey * 255.0) as u8;
+		Color::grey(g)
+	}
+}
+
+impl From<f64> for Color {
+	fn from(grey: f64) -> Color {
+		let g = (grey * 255.0) as u8;
+		Color::grey(g)
+	}
+}
+
+impl From<String> for Color {
+	fn from(hex: String) -> Color {
+		Color::from(hex.as_str())
+	}
+}
+
+impl From<&str> for Color {
+	fn from(mut hex: &str) -> Color {
+		if hex.len() == 0 {
+			return Color::black();
+		}
+		if hex.chars().nth(0).unwrap() == '#' {
+			hex = &hex[1..];
+		}
+		if hex.len() != 6 && hex.len() != 8 {
+			return Color::black();
+		}
+
+		let r = u8::from_str_radix(&hex[0..2], 16).unwrap_or(0x00);
+		let g = u8::from_str_radix(&hex[2..4], 16).unwrap_or(0x00);
+		let b = u8::from_str_radix(&hex[4..6], 16).unwrap_or(0x00);
+		let a = if hex.len() == 8 {
+			u8::from_str_radix(&hex[6..8], 16).unwrap_or(0x00)
+		} else {
+			0xff
+		};
+
+		Color::rgba(r, g, b, a)
+	}
+}
+
 impl From<(u8, u8, u8)> for Color {
 	fn from(color: (u8, u8, u8)) -> Color {
 		Color::rgb(color.0, color.1, color.2)
@@ -39,6 +84,14 @@ impl Color {
 
 	pub fn rgba(r: u8, g: u8, b: u8, a: u8) -> Self {
 		Self { r, g, b, a }
+	}
+
+	pub fn grey(val: u8) -> Self {
+		Self::rgb(val, val, val)
+	}
+
+	pub fn gray(val: u8) -> Self {
+		Self::grey(val)
 	}
 
 	pub fn transparent() -> Self {
