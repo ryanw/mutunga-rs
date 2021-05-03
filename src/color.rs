@@ -22,6 +22,17 @@ impl From<f64> for Color {
 	}
 }
 
+impl From<(f32, f32, f32, f32)> for Color {
+	fn from(color: (f32, f32, f32, f32)) -> Color {
+		Color::rgba(
+			(color.0 * 255.0) as u8,
+			(color.1 * 255.0) as u8,
+			(color.2 * 255.0) as u8,
+			(color.3 * 255.0) as u8,
+		)
+	}
+}
+
 impl From<String> for Color {
 	fn from(hex: String) -> Color {
 		Color::from(hex.as_str())
