@@ -97,6 +97,7 @@ impl TerminalCanvas {
 		if w != self.back_buffer.width() || h != self.back_buffer.height() {
 			self.back_buffer.resize(w, h);
 			self.front_buffer.resize(w, h);
+			self.term.clear().unwrap();
 		}
 	}
 
