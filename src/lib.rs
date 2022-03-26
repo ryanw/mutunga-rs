@@ -4,6 +4,10 @@ mod color;
 pub use color::*;
 mod event;
 pub use event::*;
+#[cfg(not(target_arch = "wasm32"))]
+mod terminal;
+#[cfg(target_arch = "wasm32")]
+#[path = "terminal_wasm/mod.rs"]
 mod terminal;
 pub use terminal::*;
 mod canvas;
