@@ -197,6 +197,18 @@ impl Color {
 		(self.r, self.g, self.b, self.a)
 	}
 
+	pub fn as_argb(&self) -> (u8, u8, u8, u8) {
+		(self.a, self.r, self.g, self.b)
+	}
+
+	pub fn as_abgr(&self) -> (u8, u8, u8, u8) {
+		(self.a, self.b, self.g, self.r)
+	}
+
+	pub fn as_bgra(&self) -> (u8, u8, u8, u8) {
+		(self.b, self.g, self.r, self.a)
+	}
+
 	pub fn as_floats(&self) -> (f32, f32, f32, f32) {
 		(
 			self.r as f32 / 255.0,
@@ -204,6 +216,14 @@ impl Color {
 			self.b as f32 / 255.0,
 			self.a as f32 / 255.0,
 		)
+	}
+
+	pub fn as_rgb_hex(&self) -> String {
+		format!("{:02x?}{:02x?}{:02x?}", self.r, self.g, self.b)
+	}
+
+	pub fn as_rgba_hex(&self) -> String {
+		format!("{:02x?}{:02x?}{:02x?}{:02x?}", self.r, self.g, self.b, self.a)
 	}
 
 	pub fn blend(&self, bg: &Color) -> Color {
