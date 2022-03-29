@@ -1,11 +1,14 @@
+use std::mem;
+
 pub type Ansi8BitColor = u8;
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
+#[repr(C)]
 pub struct Color {
+	pub a: u8,
 	pub r: u8,
 	pub g: u8,
 	pub b: u8,
-	pub a: u8,
 }
 
 impl From<f32> for Color {
@@ -64,6 +67,18 @@ impl From<&str> for Color {
 	}
 }
 
+impl From<u32> for Color {
+	fn from(color: u32) -> Color {
+		unsafe { mem::transmute(color) }
+	}
+}
+
+impl From<u64> for Color {
+	fn from(color: u64) -> Color {
+		(color as u32).into()
+	}
+}
+
 impl From<(u8, u8, u8)> for Color {
 	fn from(color: (u8, u8, u8)) -> Color {
 		Color::rgb(color.0, color.1, color.2)
@@ -89,6 +104,20 @@ impl From<[u8; 4]> for Color {
 }
 
 impl Color {
+	pub fn hsl(h: f32, s: f32, l: f32) -> Self {
+		if s == 0.0 {
+			return Color::grey((l * 255.0) as u8);
+		}
+
+		let q = if l < 0.5 { l * (1.0 + s) } else { l + s - l * s };
+		let p = 2.0 * l - q;
+
+		let r = hue_to_rgb(p, q, h + 1.0 / 3.0) * 255.0;
+		let g = hue_to_rgb(p, q, h) * 255.0;
+		let b = hue_to_rgb(p, q, h - 1.0 / 3.0) * 255.0;
+		Color::rgb(r as u8, g as u8, b as u8)
+	}
+
 	pub fn rgb(r: u8, g: u8, b: u8) -> Self {
 		Self::rgba(r, g, b, 255)
 	}
@@ -211,11 +240,25 @@ impl Color {
 
 	pub fn as_floats(&self) -> (f32, f32, f32, f32) {
 		(
-			self.r as f32 / 255.0,
-			self.g as f32 / 255.0,
-			self.b as f32 / 255.0,
-			self.a as f32 / 255.0,
+			// About 15% faster than / 255.0
+			self.r as f32 * (1.0 / 255.0),
+			self.g as f32 * (1.0 / 255.0),
+			self.b as f32 * (1.0 / 255.0),
+			self.a as f32 * (1.0 / 255.0),
 		)
+	}
+
+	pub fn as_f64(&self) -> (f64, f64, f64, f64) {
+		(
+			self.r as f64 * (1.0 / 255.0),
+			self.g as f64 * (1.0 / 255.0),
+			self.b as f64 * (1.0 / 255.0),
+			self.a as f64 * (1.0 / 255.0),
+		)
+	}
+
+	pub fn as_u32(&self) -> u32 {
+		unsafe { mem::transmute(*self) }
 	}
 
 	pub fn as_rgb_hex(&self) -> String {
@@ -227,6 +270,9 @@ impl Color {
 	}
 
 	pub fn blend(&self, bg: &Color) -> Color {
+		if self.a == 0xff {
+			return self.clone();
+		}
 		let (fg_r, fg_g, fg_b, fg_a) = self.as_floats();
 		let (bg_r, bg_g, bg_b, bg_a) = bg.as_floats();
 
@@ -234,6 +280,7 @@ impl Color {
 		let r = ((1.0 - fg_a) * bg_a * bg_r + fg_a * fg_r) / a;
 		let g = ((1.0 - fg_a) * bg_a * bg_g + fg_a * fg_g) / a;
 		let b = ((1.0 - fg_a) * bg_a * bg_b + fg_a * fg_b) / a;
+
 		Color::rgba(
 			(r * 255.0) as u8,
 			(g * 255.0) as u8,
@@ -247,4 +294,27 @@ impl Color {
 		self.g = (self.g as f32 * brightness) as u8;
 		self.b = (self.b as f32 * brightness) as u8;
 	}
+}
+
+fn hue_to_rgb(p: f32, q: f32, mut t: f32) -> f32 {
+	if t < 0.0 {
+		t += 1.0;
+	}
+	if t > 1.0 {
+		t -= 1.0;
+	}
+
+	if t < 1.0 / 6.0 {
+		return p + (q - p) * 6.0 * t;
+	}
+
+	if t < 1.0 / 2.0 {
+		return q;
+	}
+
+	if t < 2.0 / 3.0 {
+		return p + (q - p) * (2.0 / 3.0 - t) * 6.0;
+	}
+
+	return p;
 }
