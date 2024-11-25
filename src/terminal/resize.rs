@@ -55,8 +55,8 @@ extern "C" fn handle_resize(_sig: c_int) {
 		}
 	}
 
-	let mut font_width = (size.ws_xpixel / size.ws_col) as u32;
-	let mut font_height = (size.ws_ypixel / size.ws_row) as u32;
+	let mut font_width = (size.ws_xpixel.max(1) / size.ws_col.max(1)) as u32;
+	let mut font_height = (size.ws_ypixel.max(1) / size.ws_row.max(1)) as u32;
 
 	if font_width == 0 || font_height == 0 {
 		font_width = 16;
