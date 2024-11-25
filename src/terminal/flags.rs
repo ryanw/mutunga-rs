@@ -15,8 +15,14 @@ impl Terminal {
 			#[cfg(target_os = "linux")]
 			c_line: Default::default(),
 			c_cc: Default::default(),
+			#[cfg(not(target_env = "musl"))]
 			c_ispeed: Default::default(),
+			#[cfg(target_env = "musl")]
+			__c_ispeed: Default::default(),
+			#[cfg(not(target_env = "musl"))]
 			c_ospeed: Default::default(),
+			#[cfg(target_env = "musl")]
+			__c_ospeed: Default::default(),
 		};
 
 		unsafe {
